@@ -13,9 +13,9 @@ struct HomeView: View {
         ZStack(alignment: .top) {
             UberMapViewRepresentable()
                 .ignoresSafeArea()
-            
+
             if showLocationSearchView {
-                LocationSearchView()
+                LocationSearchView(showLocationSearchView: $showLocationSearchView)
             }
             else {
                 LocationSearchActivationView()
