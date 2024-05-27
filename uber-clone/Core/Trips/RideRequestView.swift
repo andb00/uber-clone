@@ -8,11 +8,15 @@
 import SwiftUI
 
 struct RideRequestView: View {
+    @State private var selectedRideType: RideType = .uberX
+    @EnvironmentObject var locationViewModel: LocationSearchViewModel
+    
     var body: some View {
         VStack {
             Capsule()
                 .foregroundStyle(Color(.systemGray5))
                 .frame(width: 48, height: 6)
+                .padding(.top, 8)
             
             // trip info view
             HStack {
@@ -41,7 +45,7 @@ struct RideRequestView: View {
                         Spacer()
                         
                         HStack {
-                            Text("1:30 PM")
+                            Text(locationViewModel.pickupTime ?? "")
                                 .font(.system(size: 16, weight: .semibold))
                                 .foregroundStyle(.gray)
                         }
@@ -49,13 +53,15 @@ struct RideRequestView: View {
                     .padding(.bottom, 10)
                     
                     HStack {
-                        Text("Starbucks Coffee")
-                            .font(.system(size: 16, weight: .semibold))
+                        if let location = locationViewModel.selectedUberLocation {
+                            Text(location.title)
+                                .font(.system(size: 16, weight: .semibold))
+                        }
                         
                         Spacer()
                         
                         HStack {
-                            Text("2:00 PM")
+                            Text(locationViewModel.dropOffTime ?? "")
                                 .font(.system(size: 16, weight: .semibold))
                                 .foregroundStyle(.gray)
                         }
@@ -76,25 +82,31 @@ struct RideRequestView: View {
             
             ScrollView(.horizontal) {
                 HStack(spacing: 12) {
-                    ForEach(0 ..< 3, id: \.self) { _ in
+                    ForEach(RideType.allCases) { type in
                         VStack(alignment: .leading) {
                             
-                            Image("UberXIcon")
+                            Image(type.imageName)
                                 .resizable()
-                            .scaledToFit()
+                                .scaledToFit()
                             
-                            VStack(spacing: 4) {
-                                Text("UberX").font(.system(size: 14, weight: .semibold))
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(type.description).font(.system(size: 14, weight: .semibold))
                                 
-                                
-                                Text("$22.84").font(.system(size: 14, weight: .semibold))
+                                Text(locationViewModel.computeRidePrice(forType: type).toCurrency()).font(.system(size: 14, weight: .semibold))
                             }
-                            .padding(8)
+                            .padding()
+                        }
+                        .frame(width: 112, height: 140)
+                        .foregroundColor(type == selectedRideType ? .white : Color.theme.primaryTextColor)
+                        .background(Color(type == selectedRideType ? .blue : Color.theme.secondaryBackgroundColor))
+                        .scaleEffect(type == selectedRideType ? 1.2 : 1.0)
+                        .cornerRadius(10)
+                        .onTapGesture {
+                            withAnimation(.spring()) {
+                                selectedRideType = type
+                            }
                         }
                     }
-                    .frame(width: 112, height: 140)
-                    .background(Color(.systemGroupedBackground))
-                    .cornerRadius(10)
                 }
             }
             .padding(.horizontal)
@@ -122,7 +134,7 @@ struct RideRequestView: View {
                     .padding()
             }
             .frame(height: 50)
-            .background(Color(.systemGroupedBackground))
+            .background(Color.theme.secondaryBackgroundColor)
             .cornerRadius(10)
             .padding(.horizontal)
             
@@ -139,7 +151,9 @@ struct RideRequestView: View {
                     .foregroundStyle(.white)
             }
         }
-        .background(.white)
+        .padding(.bottom, 24)
+        .background(Color.theme.backgroundColor)
+        .cornerRadius(12)
     }
 }
 
