@@ -77,7 +77,6 @@
 		1B31EEFE2C01C37A0060BD0E /* uber-clone */ = {
 			isa = PBXGroup;
 			children = (
-				1B31EF132C01C3EB0060BD0E /* App */,
 				1B31EF122C01C3E90060BD0E /* Core */,
 				1B31EF112C01C3E70060BD0E /* Extensions */,
 				1B31EF102C01C3E50060BD0E /* Managers */,
@@ -134,13 +133,6 @@
 			path = Core;
 			sourceTree = "<group>";
 		};
-		1B31EF132C01C3EB0060BD0E /* App */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = App;
-			sourceTree = "<group>";
-		};
 		1B31EF142C01C4B50060BD0E /* ViewModel */ = {
 			isa = PBXGroup;
 			children = (
@@ -163,7 +155,6 @@
 			isa = PBXGroup;
 			children = (
 				1B31EF232C027F7B0060BD0E /* Views */,
-				1B31EF222C027F700060BD0E /* ViewModel */,
 			);
 			path = Home;
 			sourceTree = "<group>";
@@ -175,13 +166,6 @@
 				1B31EF142C01C4B50060BD0E /* ViewModel */,
 			);
 			path = "Location Search";
-			sourceTree = "<group>";
-		};
-		1B31EF222C027F700060BD0E /* ViewModel */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = ViewModel;
 			sourceTree = "<group>";
 		};
 		1B31EF232C027F7B0060BD0E /* Views */ = {

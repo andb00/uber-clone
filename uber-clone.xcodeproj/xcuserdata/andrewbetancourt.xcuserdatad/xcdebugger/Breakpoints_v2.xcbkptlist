@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bucket
+   uuid = "C8B931F2-6FED-410D-903D-5A2DF4B760CB"
+   type = "1"
+   version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "176A6639-DC23-41B4-9FB7-56ECA9506C23"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../../var/folders/kd/4lm0xgpx4f7d9zp08r8qh4gc0000gn/T/swift-generated-sources/@__swiftmacro_10uber_clone0035LocationSearchResultCellswift_IgGGkfMX38_0_33_E1BC57A3C7E70C19924487F2C26B8229Ll7PreviewfMf_.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "1"
+            endingLineNumber = "1"
+            landmarkName = "$s10uber_clone0035LocationSearchResultCellswift_IgGGkfMX38_0_33_E1BC57A3C7E70C19924487F2C26B8229Ll7PreviewfMf_15PreviewRegistryfMu_"
+            landmarkType = "37">
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
+</Bucket>
