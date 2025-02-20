@@ -7,7 +7,9 @@
 
 import Foundation
 import MapKit
+import _MapKit_SwiftUI
 
+@MainActor
 class LocationSearchViewModel: NSObject, ObservableObject{
     
     // MARK - Properties
@@ -16,6 +18,10 @@ class LocationSearchViewModel: NSObject, ObservableObject{
     @Published var selectedUberLocation: UberLocation?
     @Published var pickupTime: String?
     @Published var dropOffTime: String?
+    @Published var route: MKRoute?
+    @Published var routeDestination: MKMapItem?
+    @Published var cameraPosition: MapCameraPosition = .userLocation(fallback: .automatic)
+    @Published var routeDisplaying: Bool = false
     
     private let searchCompleter = MKLocalSearchCompleter()
     var queryFragment: String = "" {
@@ -36,24 +42,22 @@ class LocationSearchViewModel: NSObject, ObservableObject{
     
     // MARK: - Helpers
     
-    func selectLocation(_ localSearch: MKLocalSearchCompletion) {
-        locationSearch(forLocalSearchCompletion: localSearch) { response, error in
-            if let error = error {
-                print("DEBUG: Location search failed with error \(error.localizedDescription)")
-            }
-            guard let item = response?.mapItems.first else {return}
-            let coordinate = item.placemark.coordinate
-            self.selectedUberLocation = UberLocation(title: localSearch.title, coordinate: coordinate)
-            print("DEBUG: Location coordinates \(coordinate)")
-        }
+    func selectLocation(_ localSearch: MKLocalSearchCompletion) async {
+        let response =  await locationSearch(forLocalSearchCompletion: localSearch)
+
+        guard let item = response?.mapItems.first else {return}
+        let coordinate = item.placemark.coordinate
+        selectedUberLocation = UberLocation(title: localSearch.title, coordinate: coordinate)
+        print("DEBUG: Location coordinates \(coordinate)")
+        print("DEBUG: selectedUberLocation \(String(describing: selectedUberLocation))")
     }
     
-    func locationSearch(forLocalSearchCompletion localSearch: MKLocalSearchCompletion, completion: @escaping MKLocalSearch.CompletionHandler) {
+    func locationSearch(forLocalSearchCompletion localSearch: MKLocalSearchCompletion) async -> MKLocalSearch.Response? {
         let searchRequest = MKLocalSearch.Request()
         searchRequest.naturalLanguageQuery = localSearch.title.appending(localSearch.subtitle)
-        let search = MKLocalSearch(request: searchRequest)
+        let results = try? await MKLocalSearch(request: searchRequest).start()
         
-        search.start(completionHandler: completion)
+        return results
     }
     
     func computeRidePrice(forType type: RideType) -> Double {
@@ -67,9 +71,9 @@ class LocationSearchViewModel: NSObject, ObservableObject{
         return type.computePrice(for: tripDistanceInMeters)
     }
     
-    func getDestinationRoute(from userLocation: CLLocationCoordinate2D,
-                             to destination: CLLocationCoordinate2D,
-                             completion: @escaping(MKRoute) -> Void) {
+    func getDestinationRoute() async {
+        guard let userLocation = await getUserLocation() else { print("userLocation is nil"); return }
+        guard let destination = selectedUberLocation?.coordinate else {print("selectedUberLocation is nil"); return }
         
         let userPlacemark = MKPlacemark(coordinate: userLocation)
         let destPlacemark = MKPlacemark(coordinate: destination)
@@ -78,15 +82,17 @@ class LocationSearchViewModel: NSObject, ObservableObject{
         request.destination = MKMapItem(placemark: destPlacemark)
         let directions = MKDirections(request: request)
         
-        directions.calculate { response, error in
-            if let error = error {
-                print("DEBUG: Failed to get directions with error \(error.localizedDescription)")
-                return
-            }
-            guard let route = response?.routes.first else {return}
+        do {
+            let response = try await directions.calculate()
+            
+            guard let route = response.routes.first else {return}
+            self.route = route
             self.configurePickupAndDropoffTimes(with: route.expectedTravelTime)
-            completion(route)
+        }catch {
+            print(error.localizedDescription)
         }
+        
+            
     }
     
     func configurePickupAndDropoffTimes(with expectedTravelTime: Double) {
@@ -96,9 +102,22 @@ class LocationSearchViewModel: NSObject, ObservableObject{
         pickupTime = formatter.string(from: Date())
         dropOffTime = formatter.string(from: Date() + expectedTravelTime)
     }
+    
+    func getUserLocation() async -> CLLocationCoordinate2D? {
+        let updates = CLLocationUpdate.liveUpdates()
+        
+        do {
+            let update = try await updates.first { $0.location?.coordinate != nil }
+            return update?.location?.coordinate
+            
+        }catch {
+            print(error.localizedDescription)
+            return nil
+        }
+    }
 }
 
-extension LocationSearchViewModel: MKLocalSearchCompleterDelegate {
+extension LocationSearchViewModel: @preconcurrency MKLocalSearchCompleterDelegate {
     func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
         self.results = completer.results
     }

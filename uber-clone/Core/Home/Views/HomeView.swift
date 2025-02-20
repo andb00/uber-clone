@@ -6,45 +6,56 @@
 //
 
 import SwiftUI
+import MapKit
 
 struct HomeView: View {
     @State private var mapState = MapViewState.noInput
+    @State private var selectedPlace: MKMapItem?
     @EnvironmentObject var locationViewModel: LocationSearchViewModel
 
     var body: some View {
-        ZStack(alignment: .bottom) {
-            ZStack(alignment: .top) {
+        ZStack(alignment: .top) {
+            
+            Map(position: $locationViewModel.cameraPosition) {
                 
-                UberMapViewRepresentable(mapState: $mapState)
-                    .ignoresSafeArea()
-
-                if mapState == .searchingForLocation{
-                    LocationSearchView(mapState: $mapState)
+                if let route = locationViewModel.route {
+                    MapPolyline(route.polyline)
+                        .stroke(Color.black, lineWidth: 3)
+                    
                 }
-                else if mapState == .noInput {
-                    LocationSearchActivationView()
-                        .padding(.top, 72)
-                        .onTapGesture {
-                            withAnimation(.spring){
-                                mapState = .searchingForLocation
-                            }
+                
+                // TODO: Add marker for destination route.
+                
+                UserAnnotation()
+            }
+            .tint(.orange)
+                
+            if mapState == .searchingForLocation{
+                LocationSearchView(mapState: $mapState)
+            }
+            else if mapState == .noInput {
+                LocationSearchActivationView()
+                    .padding(.top, 72)
+                    .onTapGesture {
+                        withAnimation(.spring){
+                            mapState = .searchingForLocation
                         }
-                }
-                
-                MapViewActionButton(mapState: $mapState)
-                    .padding(.leading)
-                    .padding(.top, 4)
+                    }
             }
             
-            if mapState == .locationSelected || mapState == .polylineAdded {
-                RideRequestView().transition(.move(edge: .bottom))
-            }
+            MapViewActionButton(mapState: $mapState)
+                .padding(.leading)
+                .padding(.top, 4)
         }
         .edgesIgnoringSafeArea(.bottom)
         .onReceive(LocationManager.shared.$userLocation) { location in
             if let location = location {
                 locationViewModel.userLocation = location
             }
+        }
+        
+        if mapState == .locationSelected || mapState == .polylineAdded {
+            RideRequestView().transition(.move(edge: .bottom))
         }
     }
 }

@@ -159,4 +159,5 @@ struct RideRequestView: View {
 
 #Preview {
     RideRequestView()
+        .environmentObject(LocationSearchViewModel())
 }

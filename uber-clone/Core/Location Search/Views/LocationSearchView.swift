@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import MapKit
 
 struct LocationSearchView: View {
     @State private var startLocationText = ""
@@ -55,9 +56,12 @@ struct LocationSearchView: View {
                         LocationSearchResultCell(title: result.title, subtitle: result.subtitle)
                             .onTapGesture {
                                 withAnimation(.spring()){
-                                    viewModel
-                                        .selectLocation(result)
+                                    Task {
+                                        await viewModel.selectLocation(result)
+                                        await viewModel.getDestinationRoute()
+                                    }
                                     mapState = .locationSelected
+                                    
                                 }
                             }
                     }
@@ -70,5 +74,7 @@ struct LocationSearchView: View {
 }
 
 #Preview {
-    LocationSearchView(mapState: .constant(.searchingForLocation))
+    LocationSearchView(mapState:
+            .constant(.searchingForLocation))
+            .environmentObject(LocationSearchViewModel())
 }
